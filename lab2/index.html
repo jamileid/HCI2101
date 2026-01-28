@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>لعبة XO</title>
+<style>
+body {
+    font-family: Tahoma, sans-serif;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    margin: 0;
+    color: #fff;
+    text-align: center;
+}
+
+.container {
+    max-width: 420px;
+    margin: 40px auto;
+    background: rgba(0,0,0,0.3);
+    padding: 20px;
+    border-radius: 15px;
+}
+
+input, select, button {
+    width: 90%;
+    padding: 10px;
+    margin: 8px 0;
+    border-radius: 8px;
+    border: none;
+    font-size: 16px;
+}
+
+button {
+    background: #00e6e6;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.game {
+    display: none;
+}
+
+.board {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin: 20px 0;
+}
+
+.cell {
+    background: #fff;
+    color: #333;
+    font-size: 40px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+.footer {
+    margin-top: 20px;
+    background: rgba(0,0,0,0.4);
+    padding: 10px;
+    border-radius: 10px;
+    font-size: 14px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container" id="startScreen">
+    <h1>🎮 لعبة XO</h1>
+    <input type="text" id="player1" placeholder="اسم اللاعب الأول">
+    <input type="text" id="player2" placeholder="اسم اللاعب الثاني (اختياري)">
+    <select id="mode">
+        <option value="single">لاعب واحد</option>
+        <option value="two">لاعبين</option>
+    </select>
+    <button onclick="startGame()">ابدأ اللعبة</button>
+</div>
+
+<div class="container game" id="gameScreen">
+    <h2 id="turn"></h2>
+    <div class="board" id="board"></div>
+    <button onclick="resetGame()">إعادة اللعب</button>
+
+    <div class="footer">
+        <p>Student Name: JAMEEL ADIL J EED (جميل عادل بن جميل عيد)</p>
+        <p>Student ID: 446002974</p>
+        <p>Supervised by: Mohammed Ahmed Jabali</p>
+    </div>
+</div>
+
+<script>
+let board = ["","","","","","","","",""];
+let currentPlayer = "X";
+let players = {};
+let mode = "single";
+
+function startGame() {
+    const p1 = document.getElementById("player1").value || "اللاعب 1";
+    const p2 = document.getElementById("player2").value || "اللاعب 2";
+    mode = document.getElementById("mode").value;
+
+    players = {
+        X: p1,
+        O: mode === "single" ? "الكمبيوتر" : p2
+    };
+
+    document.getElementById("startScreen").style.display = "none";
+    document.getElementById("gameScreen").style.display = "block";
+    drawBoard();
+    updateTurn();
+}
+
+function drawBoard() {
+    const b = document.getElementById("board");
+    b.innerHTML = "";
+    board.forEach((v,i) => {
+        const c = document.createElement("div");
+        c.className = "cell";
+        c.innerText = v;
+        c.onclick = () => play(i);
+        b.appendChild(c);
+    });
+}
+
+function play(i) {
+    if (board[i] !== "") return;
+    board[i] = currentPlayer;
+    drawBoard();
+
+    if (checkWin()) {
+        alert("الفائز: " + players[currentPlayer]);
+        resetGame();
+        return;
+    }
+
+    if (!board.includes("")) {
+        alert("تعادل");
+        resetGame();
+        return;
+    }
+
+    currentPlayer = currentPlayer === "X" ? "O" : "X";
+    updateTurn();
+
+    if (mode === "single" && currentPlayer === "O") {
+        setTimeout(aiMove, 500);
+    }
+}
+
+function aiMove() {
+    const empty = board.map((v,i)=>v===""?i:null).filter(v=>v!==null);
+    play(empty[Math.floor(Math.random()*empty.length)]);
+}
+
+function updateTurn() {
+    document.getElementById("turn").innerText = "الدور على: " + players[currentPlayer];
+}
+
+function checkWin() {
+    const w = [
+        [0,1,2],[3,4,5],[6,7,8],
+        [0,3,6],[1,4,7],[2,5,8],
+        [0,4,8],[2,4,6]
+    ];
+    return w.some(a => a.every(i => board[i] === currentPlayer));
+}
+
+function resetGame() {
+    board = ["","","","","","","","",""];
+    currentPlayer = "X";
+    drawBoard();
+    updateTurn();
+}
+</script>
+
+</body>
+</html>
